@@ -1,0 +1,20 @@
+{
+  "mappings": {
+    "default": {
+      "map": {
+        "0": "atlantiscopper",
+        "2": "5_console",
+        "3": "1_console",
+        "4": "zpm_base",
+        "missing": "",
+        "table_shell": "atlantis_prop_shell",
+        "table_fascia": "atlantis_prop_fascia",
+        "table_deck": "atlantis_prop_deck",
+        "table_inlay": "atlantis_prop_inlay",
+        "table_shadow": "atlantis_prop_shadow",
+        "5": "brown_plate"
+      },
+      "name": "default"
+    }
+  }
+}

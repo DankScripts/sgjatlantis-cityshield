@@ -1,0 +1,7 @@
+All Rights Reserved.
+
+Copyright (c) 2026 MustangDoc / DankScripts.
+
+This source is published for inspection, compatibility work, and accepted
+contributions. It may not be redistributed, repackaged, or published without
+prior written permission from the copyright holder.

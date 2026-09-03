@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "sgjadditions:block/atlantisdhd"
+    },
+    "facing=east": {
+      "model": "sgjadditions:block/atlantisdhd",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "sgjadditions:block/atlantisdhd",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "sgjadditions:block/atlantisdhd",
+      "y": 270
+    }
+  }
+}

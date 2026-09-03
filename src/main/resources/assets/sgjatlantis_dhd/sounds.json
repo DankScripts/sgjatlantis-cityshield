@@ -1,0 +1,43 @@
+{
+  "pegasus_shield_opening": {
+    "subtitle": "subtitles.sgjatlantis_dhd.pegasus_shield_opening",
+    "sounds": [
+      {
+        "name": "sgjatlantis_dhd:shield/shield_opening",
+        "volume": 8.0
+      }
+    ]
+  },
+  "pegasus_shield_closing": {
+    "subtitle": "subtitles.sgjatlantis_dhd.pegasus_shield_closing",
+    "sounds": [
+      {
+        "name": "sgjatlantis_dhd:shield/shield_closing",
+        "volume": 8.0
+      }
+    ]
+  },
+  "pegasus_shield_hit": {
+    "subtitle": "subtitles.sgjatlantis_dhd.pegasus_shield_hit",
+    "sounds": [
+      {
+        "name": "sgjatlantis_dhd:shield/shield_hit_1",
+        "volume": 8.0
+      },
+      {
+        "name": "sgjatlantis_dhd:shield/shield_hit_2",
+        "volume": 8.0
+      },
+      {
+        "name": "sgjatlantis_dhd:shield/shield_hit_3",
+        "volume": 8.0
+      }
+    ]
+  },
+  "pegasus_shield_humming": {
+    "subtitle": "subtitles.sgjatlantis_dhd.pegasus_shield_humming",
+    "sounds": [
+      "sgjatlantis_dhd:shield/shield_humming"
+    ]
+  }
+}

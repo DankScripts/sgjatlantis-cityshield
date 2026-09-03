@@ -1,0 +1,20 @@
+{
+  "parent": "sgjatlantis_dhd:custom/atlantisdhd",
+  "textures": {
+    "all": "sgjatlantis_dhd:block/zpm_base",
+    "particle": "sgjatlantis_dhd:block/zpm_base",
+    "0": "sgjatlantis_dhd:block/atlantiscopper",
+    "2": "sgjatlantis_dhd:block/5_console",
+    "3": "sgjatlantis_dhd:block/1_console",
+    "4": "sgjatlantis_dhd:block/zpm_base",
+    "triangle": "sgjatlantis_dhd:block/atlantis_triangle",
+    "missing": "sgjatlantis_dhd:block/zpm_base",
+    "table_shell": "sgjatlantis_dhd:block/atlantis_prop_shell",
+    "table_fascia": "sgjatlantis_dhd:block/atlantis_prop_fascia",
+    "table_deck": "sgjatlantis_dhd:block/atlantis_prop_deck",
+    "table_inlay": "sgjatlantis_dhd:block/atlantis_prop_inlay",
+    "table_shadow": "sgjatlantis_dhd:block/atlantis_prop_shadow",
+    "5": "sgjatlantis_dhd:block/brown_plate"
+  },
+  "render_type": "solid"
+}
