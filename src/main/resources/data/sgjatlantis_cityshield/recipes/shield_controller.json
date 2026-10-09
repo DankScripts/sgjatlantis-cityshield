@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["TCT", "CEC", "PMP"],
+  "key": {
+    "T": {"item": "sgjourney:trinium_ingot"},
+    "C": {"item": "sgjourney:control_crystal"},
+    "E": {"item": "sgjourney:energy_crystal"},
+    "P": {"item": "minecraft:prismarine_bricks"},
+    "M": {"item": "sgjourney:materialization_crystal"}
+  },
+  "result": {"item": "sgjatlantis_cityshield:shield_controller"}
+}

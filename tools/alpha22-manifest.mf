@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Specification-Title: sgjatlantis_cityshield
+Specification-Vendor: DankScripts
+Specification-Version: 1
+Implementation-Title: atlantis-city-shield
+Implementation-Version: 0.1.0-alpha.22
+Implementation-Vendor: DankScripts
+MixinConfigs: sgjatlantis_cityshield.mixins.json
+

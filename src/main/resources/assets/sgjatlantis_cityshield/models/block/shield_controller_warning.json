@@ -1,0 +1,17 @@
+{
+  "parent": "sgjatlantis_cityshield:block/shield_controller_base",
+  "loader": "forge:composite",
+  "children": {
+    "table": {
+      "parent": "sgjatlantis_cityshield:block/shield_controller_body",
+      "textures": {
+        "projector": "sgjatlantis_cityshield:block/atlantis_shield_projector_off"
+      }
+    },
+    "solid_legs": {
+      "loader": "forge:obj",
+      "model": "sgjatlantis_cityshield:models/block/shield_controller_solid_legs.obj",
+      "flip_v": true
+    }
+  }
+}

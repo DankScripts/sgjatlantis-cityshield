@@ -1,0 +1,8 @@
+90196cf3dced17bb50a35642b307b5d2c1b4dc77d5d8294bffa91e817e6eecf7  src/main/resources/assets/sgjatlantis_cityshield/models/block/shield_controller_base.json
+3286e820914ebead664aebab3f3508e203e3b965ff161b537f1c4789b7f699f5  src/main/resources/assets/sgjatlantis_cityshield/models/block/shield_controller_body.json
+ae41b69847ee74ea4d2655c79a68726c33e082c0fedc48bef99f8115454b6789  src/main/resources/assets/sgjatlantis_cityshield/models/block/shield_controller_solid_legs.obj
+98fa41218c12db2d66224f2f04d2f606d8f2f728e5c3637c8c27d581a6c27fa4  src/main/resources/assets/sgjatlantis_cityshield/models/block/shield_controller_solid_legs.mtl
+
+This is the permanently accepted Atlantis Shield Controller table model baseline.
+Do not change its geometry, textures, crystals, legs, joint panels, display, or hologram layout unless the user explicitly requests a table-model change.
+The user-requested leg changes convert each twelve-segment diagonal beam into one continuous tapered mesh, yaw its cross-section to match the mirrored ±22.5-degree foot angles, remove the two obsolete stepped lower joint caps, and bury each leg's horizontal end cap inside its foot so only continuous side faces emerge at the existing connection point. The tabletop, feet, upper mounts, controls, and all other 87 JSON elements are unchanged.

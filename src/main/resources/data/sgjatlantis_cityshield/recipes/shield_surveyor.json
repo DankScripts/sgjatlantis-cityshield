@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["M", "C", "R"],
+  "key": {
+    "M": {"item": "sgjourney:memory_crystal"},
+    "C": {"item": "sgjourney:communication_crystal"},
+    "R": {"item": "sgjourney:naquadah_copper_rod"}
+  },
+  "result": {"item": "sgjatlantis_cityshield:shield_surveyor"}
+}
