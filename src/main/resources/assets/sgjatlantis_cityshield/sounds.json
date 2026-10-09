@@ -1,0 +1,11 @@
+{
+  "shield_raise": {
+    "subtitle": "subtitles.sgjatlantis_cityshield.shield_raise",
+    "sounds": [
+      {
+        "name": "sgjatlantis_cityshield:shield_raise",
+        "stream": true
+      }
+    ]
+  }
+}

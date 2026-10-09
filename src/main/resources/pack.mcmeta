@@ -1,6 +1,8 @@
 {
   "pack": {
-    "description": "sgjatlantis-dhd resources",
+    "description": {
+      "text": "Atlantis City Shield resources"
+    },
     "pack_format": 34
   }
 }

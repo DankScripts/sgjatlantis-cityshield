@@ -1,0 +1,10 @@
+{
+  "type":"minecraft:crafting_shaped",
+  "pattern":["PSP","SES","PSP"],
+  "key":{
+    "P":{"item":"minecraft:prismarine_bricks"},
+    "S":{"item":"minecraft:sea_lantern"},
+    "E":{"item":"minecraft:ender_eye"}
+  },
+  "result":{"id":"sgjatlantis_cityshield:shield_emitter"}
+}

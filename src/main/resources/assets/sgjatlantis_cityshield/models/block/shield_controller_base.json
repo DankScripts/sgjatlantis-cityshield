@@ -1,0 +1,62 @@
+{
+  "loader": "neoforge:composite",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "sgjatlantis_cityshield:block/atlantis_prop_shell",
+    "shell": "sgjatlantis_cityshield:block/atlantis_prop_shell",
+    "fascia": "sgjatlantis_cityshield:block/atlantis_prop_fascia",
+    "deck": "sgjatlantis_cityshield:block/atlantis_prop_deck",
+    "inlay": "sgjatlantis_cityshield:block/atlantis_prop_inlay",
+    "lightbar": "sgjatlantis_cityshield:block/atlantis_prop_lightbar",
+    "crystal": "sgjatlantis_cityshield:block/atlantis_prop_crystal",
+    "projector": "sgjatlantis_cityshield:block/atlantis_shield_projector",
+    "amber": "sgjatlantis_cityshield:block/atlantis_prop_amber_glyph",
+    "lit_crystal": "sgjatlantis_cityshield:block/atlantis_prop_lit_crystal"
+  },
+  "children": {
+    "table": {
+      "parent": "sgjatlantis_cityshield:block/shield_controller_body"
+    },
+    "solid_legs": {
+      "loader": "neoforge:obj",
+      "model": "sgjatlantis_cityshield:models/block/shield_controller_solid_legs.obj",
+      "flip_v": true
+    }
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [68, 45, 0],
+      "translation": [0, 2, 0],
+      "scale": [0.28, 0.28, 0.28]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [68, 225, 0],
+      "translation": [0, 2, 0],
+      "scale": [0.28, 0.28, 0.28]
+    },
+    "firstperson_righthand": {
+      "rotation": [12, 45, 0],
+      "translation": [0, 1, 0],
+      "scale": [0.25, 0.25, 0.25]
+    },
+    "firstperson_lefthand": {
+      "rotation": [12, 225, 0],
+      "translation": [0, 1, 0],
+      "scale": [0.25, 0.25, 0.25]
+    },
+    "ground": {
+      "translation": [0, 2, 0],
+      "scale": [0.34, 0.34, 0.34]
+    },
+    "gui": {
+      "rotation": [32, 225, 0],
+      "translation": [0, -1, 0],
+      "scale": [0.42, 0.42, 0.42]
+    },
+    "fixed": {
+      "rotation": [0, 180, 0],
+      "translation": [0, -1, 0],
+      "scale": [0.45, 0.45, 0.45]
+    }
+  }
+}

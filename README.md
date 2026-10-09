@@ -1,47 +1,50 @@
-# Atlantis DHD 2.0.3-beta.3
+# Atlantis City Shield 1.0.2
 
-Atlantis DHD is a standalone Atlantis/Pegasus-style Dial Home Device for
-Stargate Journey. This branch contains the NeoForge port for Minecraft 1.21.1.
+## Source Branches
+
+- [Forge 1.20.1](https://github.com/DankScripts/sgjatlantis-cityshield/tree/1.20.1-forge)
+- [NeoForge 1.21.1](https://github.com/DankScripts/sgjatlantis-cityshield/tree/1.21.1-neoforge)
+
+First NeoForge port of the Atlantis City Shield mod.
 
 ## Requirements
 
 - Minecraft 1.21.1
-- NeoForge 21.1.219
+- NeoForge 21.1.219 or newer within the 21.1 series
 - Java 21
-- Stargate Journey 0.6.48-hotfix1
+- SGJourney 0.6.50 or newer for NeoForge 1.21.1
 
-## Features
+Install the release JAR alongside SGJourney in the instance's `mods` directory.
+Do not install the Forge 1.20.1 JAR in a NeoForge instance. Keep only one version
+of Atlantis City Shield installed.
 
-- Current Atlantis control-table model and physical button rendering.
-- Atlantis/Pegasus dialing interface and live constellation display.
-- Normal right-click opens the dialer.
-- Sneak-right-click opens Crystal Controls when permitted.
-- Native SGJourney support for compatible Pegasus crystals.
-- Large Naquadah Cable power support through the restored decorative floor.
-- Stargate shield controls and migration compatibility.
+## Build
 
-The minimum operating set is one Large Control Crystal, two Advanced Energy
-Crystals, and one Advanced Transfer Crystal. Advanced Communication Crystals
-remain optional.
+With Java 21 selected, run `gradlew.bat release` on Windows or
+`./gradlew release` elsewhere. The JAR and complete buildable source ZIP are
+written to `dist/`. SGJourney is a mandatory dependency and is not bundled.
 
-## Building
+## Shield Setup
 
-Run:
+Place the Shield Controller and a Shield Emitter within controller range.
+Connect the emitter to a loaded ZPM Hub using Large Naquadah Cable. Native hub
+energy is used without requiring the optional ZPM item energy capability.
+The default draw remains 100,000,000 FE per tick.
 
-```bash
-./gradlew clean build
-```
+With the shield off, sneak-use the Shield Surveyor on the controller to bind it.
+Sneak-use the air to select CENTER, NORTH, SOUTH, EAST, WEST, TOP, and BOTTOM,
+and use blocks to mark each point. CENTER is the middle of the city at water
+level. Open the settings with the Surveyor, check Preview, and select Commit.
 
-The built JAR is written to `build/libs/`.
+Unprogrammed standard communication crystals add 16 blocks of controller range;
+advanced crystals add 32 blocks. Programmed crystals do not extend that range.
 
-See `PORT_STATUS.md` and `CHANGELOG.md` for release-specific details.
+## Port Scope
 
-## Downloads
+Retains the accepted controller geometry, textures, powered rear lightbar,
+activation sound, survey workflow, projected hologram, shield defenses, and
+weather barrier. Networking, energy capabilities, chunk tickets, item data,
+menus, rendering APIs, recipes, and loot directories use the 1.21.1 APIs.
 
-Use the official CurseForge project for supported release downloads. Files
-built directly from this development branch may be unfinished or untested.
-
-## License
-
-Copyright (c) 2026 MustangDoc / DankScripts. All Rights Reserved. See
-`LICENSE.txt` for details.
+This is not a world-conversion tool. Forge 1.20.1 saves are not certified for
+migration to Minecraft 1.21.1. Back up saves before upgrading platforms.

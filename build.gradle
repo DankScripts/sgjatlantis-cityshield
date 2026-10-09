@@ -1,22 +1,16 @@
 plugins {
     id 'java-library'
-    id 'idea'
     id 'net.neoforged.moddev' version '2.0.106'
 }
 
 version = mod_version
 group = mod_group_id
-
-base {
-    archivesName = "sgjatlantis-dhd-${minecraft_version}"
-}
-
+base { archivesName = "${mod_id}-${minecraft_version}" }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
     mavenCentral()
     maven {
-        name = 'CurseMaven'
         url = 'https://cursemaven.com'
         content { includeGroup 'curse.maven' }
     }
@@ -24,29 +18,42 @@ repositories {
 
 neoForge {
     version = neo_version
-
-    parchment {
-        minecraftVersion = parchment_minecraft_version
-        mappingsVersion = parchment_mappings_version
-    }
-
+    accessTransformers.from(file('src/main/resources/META-INF/accesstransformer.cfg'))
     runs {
         client { client() }
         server { server() }
     }
-
     mods {
-        "${mod_id}" {
-            sourceSet(sourceSets.main)
-        }
+        "${mod_id}" { sourceSet(sourceSets.main) }
     }
 }
 
 dependencies {
-    // Stargate Journey 1.21.1 0.6.48-hotfix1 (CurseForge file 8670937)
-    implementation 'curse.maven:sgjourney-689083:8670937'
+    implementation "curse.maven:sgjourney-689083:${sgjourney_file_id}"
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.named('processResources').configure {
+    def properties = [mod_id: mod_id, mod_name: mod_name, mod_version: mod_version,
+                      mod_license: mod_license, mod_authors: mod_authors,
+                      mod_description: mod_description]
+    inputs.properties properties
+    filesMatching('META-INF/neoforge.mods.toml') { expand properties }
 }
+
+tasks.register('sourceArchive', Zip) {
+    archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-source.zip"
+    destinationDirectory = layout.projectDirectory.dir('dist')
+    from(projectDir) {
+        include 'src/**', 'gradle/**', 'gradlew', 'gradlew.bat', 'build.gradle',
+                'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md', 'LICENSE.txt'
+    }
+}
+
+tasks.register('releaseJar', Copy) {
+    dependsOn 'build'
+    from(tasks.named('jar'))
+    into(layout.projectDirectory.dir('dist'))
+}
+
+tasks.register('release') { dependsOn 'releaseJar', 'sourceArchive' }

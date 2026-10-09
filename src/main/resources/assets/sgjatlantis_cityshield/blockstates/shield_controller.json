@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north,visual_state=standby": { "model": "sgjatlantis_cityshield:block/shield_controller_standby" },
+    "facing=east,visual_state=standby": { "model": "sgjatlantis_cityshield:block/shield_controller_standby", "y": 90, "uvlock": true },
+    "facing=south,visual_state=standby": { "model": "sgjatlantis_cityshield:block/shield_controller_standby", "y": 180, "uvlock": true },
+    "facing=west,visual_state=standby": { "model": "sgjatlantis_cityshield:block/shield_controller_standby", "y": 270, "uvlock": true },
+    "facing=north,visual_state=forming": { "model": "sgjatlantis_cityshield:block/shield_controller_forming" },
+    "facing=east,visual_state=forming": { "model": "sgjatlantis_cityshield:block/shield_controller_forming", "y": 90, "uvlock": true },
+    "facing=south,visual_state=forming": { "model": "sgjatlantis_cityshield:block/shield_controller_forming", "y": 180, "uvlock": true },
+    "facing=west,visual_state=forming": { "model": "sgjatlantis_cityshield:block/shield_controller_forming", "y": 270, "uvlock": true },
+    "facing=north,visual_state=active": { "model": "sgjatlantis_cityshield:block/shield_controller_active" },
+    "facing=east,visual_state=active": { "model": "sgjatlantis_cityshield:block/shield_controller_active", "y": 90, "uvlock": true },
+    "facing=south,visual_state=active": { "model": "sgjatlantis_cityshield:block/shield_controller_active", "y": 180, "uvlock": true },
+    "facing=west,visual_state=active": { "model": "sgjatlantis_cityshield:block/shield_controller_active", "y": 270, "uvlock": true },
+    "facing=north,visual_state=warning": { "model": "sgjatlantis_cityshield:block/shield_controller_warning" },
+    "facing=east,visual_state=warning": { "model": "sgjatlantis_cityshield:block/shield_controller_warning", "y": 90, "uvlock": true },
+    "facing=south,visual_state=warning": { "model": "sgjatlantis_cityshield:block/shield_controller_warning", "y": 180, "uvlock": true },
+    "facing=west,visual_state=warning": { "model": "sgjatlantis_cityshield:block/shield_controller_warning", "y": 270, "uvlock": true }
+  }
+}

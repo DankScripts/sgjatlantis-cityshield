@@ -1,0 +1,8 @@
+{
+  "type":"minecraft:block",
+  "pools":[{
+    "rolls":1,
+    "entries":[{"type":"minecraft:item","name":"sgjatlantis_cityshield:shield_emitter"}],
+    "conditions":[{"condition":"minecraft:survives_explosion"}]
+  }]
+}

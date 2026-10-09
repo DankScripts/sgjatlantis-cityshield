@@ -1,16 +1,19 @@
 # Changelog
 
-## 2.0.3-beta.3 — Minecraft 1.21.1 NeoForge
+## 1.0.2
 
-- Updated the physical Atlantis DHD table to the current accepted model.
-- Changed interaction routing so normal right-click always opens the dialer
-  and sneak-right-click opens Crystal Controls.
-- Added the minimum dialing crystal set: one Large Control Crystal, two
-  Advanced Energy Crystals, and one Advanced Transfer Crystal.
-- Kept Advanced Communication Crystals optional.
-- Preserved native SGJourney support for all compatible Pegasus crystal types.
-- Added a conditional NeoForge capability proxy on the decorative floor tile
-  directly above a Large Naquadah Cable. It exposes only the nearby Atlantis
-  DHD to SGJourney's native cable output path, including zero-point energy.
-- Preserved the established NeoForge 1.21.1 GUI, menus, shield controls,
-  capabilities, symbol display, and migration compatibility.
+- Detects Large Naquadah Cable blocks beneath the emitter through up to two
+  intervening blocks, even when the concealed cable has no block entity.
+- Resolves live endpoints through the native cable network and periodically
+  refreshes routes so cable topology changes do not leave stale power sources.
+- First NeoForge 1.21.1 release, targeting NeoForge 21.1.219 and Java 21.
+- Requires SGJourney 0.6.50 and uses native ZPM Hub zero-point energy storage.
+- Migrated custom networking to NeoForge payload registration and distribution.
+- Migrated energy exposure to registered block-entity capabilities and chunk
+  forcing to a registered ticket controller.
+- Migrated item state to data components and inventory persistence to
+  registry-aware serialization. Uses SGJourney's frequency component API.
+- Updated protection events, menus, block interactions, renderer buffers,
+  model loaders, mixin targets, access transformers, recipes, and loot tables.
+- Retains accepted shield/table visuals, activation audio, survey mechanics,
+  and the default 100,000,000 FE per tick power draw.
