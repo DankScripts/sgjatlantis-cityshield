@@ -9,11 +9,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -24,6 +26,10 @@ import java.util.Map;
 
 public final class ShieldSavedData extends SavedData {
     private static final String DATA_NAME = "sgjatlantis_cityshield_definitions";
+    private static final ResourceLocation LANTEA = ResourceLocation.fromNamespaceAndPath("sgjourney", "lantea");
+    private static final BlockPos BUNDLED_CONTROLLER = new BlockPos(-3901, 418, 5872);
+    private static final BlockPos PREVIOUS_BUNDLED_CONTROLLER = new BlockPos(-3902, 418, 5872);
+    private static final BlockPos LEGACY_BUNDLED_CONTROLLER = new BlockPos(-3899, 418, 5873);
     private final Map<String, ShieldDefinition> definitions = new LinkedHashMap<>();
     private final Map<String, EmitterLocation> emitters = new LinkedHashMap<>();
 
@@ -33,10 +39,28 @@ public final class ShieldSavedData extends SavedData {
     }
 
     public ShieldDefinition getOrCreate(ServerLevel level, BlockPos controller) {
+        ShieldDefinition existing = find(level, controller);
+        if (existing != null) return existing;
+
         ShieldDefinition candidate = new ShieldDefinition(level.dimension(), controller);
-        ShieldDefinition result = definitions.computeIfAbsent(candidate.key(), key -> candidate);
-        setDirty();
-        return result;
+        boolean bundledCity = (BUNDLED_CONTROLLER.equals(controller)
+                || PREVIOUS_BUNDLED_CONTROLLER.equals(controller) || LEGACY_BUNDLED_CONTROLLER.equals(controller))
+                && LANTEA.equals(level.dimension().location())
+                && (ModList.get().isLoaded("sgjatlantis_dhd")
+                    || ModList.get().isLoaded("stargate_atlantis"));
+        if (bundledCity) {
+            candidate.setCenter(new BlockPos(-3895, 248, 5884));
+            candidate.setField(3, 508);
+            candidate.setField(4, 518);
+            candidate.setField(5, 273);
+            candidate.setField(6, 63);
+            candidate.setField(7, 10);
+            candidate.commit();
+        }
+        definitions.put(candidate.key(), candidate);
+        if (bundledCity) changed();
+        else setDirty();
+        return candidate;
     }
 
     public ShieldDefinition find(Level level, BlockPos controller) {

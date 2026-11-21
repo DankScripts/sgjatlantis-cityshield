@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Recognize the planned `stargate_atlantis` mod and floor conduits while
+  retaining compatibility with the existing Atlantis namespaces.
+
+## 1.0.4
+
+- Initialize a missing shield definition for the bundled Lantea controller
+  using the Forge release's surveyed geometry. Preserve existing surveys.
+
 ## 1.0.2
 
 - Detects Large Naquadah Cable blocks beneath the emitter through up to two

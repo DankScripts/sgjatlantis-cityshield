@@ -29,7 +29,13 @@ neoForge {
 }
 
 dependencies {
-    implementation "curse.maven:sgjourney-689083:${sgjourney_file_id}"
+    def localSgJourney = file(System.getenv('SGJOURNEY_JAR') ?:
+            "libs/Stargate Journey-${minecraft_version}-0.6.55-alpha.jar")
+    if (!localSgJourney.isFile()) {
+        throw new GradleException("Private SGJourney build input missing. Set SGJOURNEY_JAR or place the supplied 0.6.55-alpha JAR at ${localSgJourney}.")
+    }
+    logger.lifecycle("SGJourney build input: ${localSgJourney}")
+    implementation files(localSgJourney)
 }
 
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
@@ -45,7 +51,7 @@ tasks.register('sourceArchive', Zip) {
     archiveFileName = "${mod_id}-${minecraft_version}-${mod_version}-source.zip"
     destinationDirectory = layout.projectDirectory.dir('dist')
     from(projectDir) {
-        include 'src/**', 'gradle/**', 'gradlew', 'gradlew.bat', 'build.gradle',
+        include 'src/**', 'tools/**', 'gradle/**', 'gradlew', 'gradlew.bat', 'build.gradle',
                 'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md', 'LICENSE.txt'
     }
 }
@@ -57,3 +63,37 @@ tasks.register('releaseJar', Copy) {
 }
 
 tasks.register('release') { dependsOn 'releaseJar', 'sourceArchive' }
+
+sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.main.runtimeClasspath
+
+tasks.register('verifyRendererRegistration', JavaExec) {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.dankscripts.sgjatlantis_cityshield.client.RendererRegistrationCheck'
+}
+
+tasks.register('verifyReleaseJar') {
+    dependsOn 'jar', 'sourceArchive'
+    doLast {
+        def jarFile = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        def sourceFile = tasks.named('sourceArchive', Zip).get().archiveFile.get().asFile
+        new java.util.zip.ZipFile(jarFile).withCloseable { jarZip ->
+            new java.util.zip.ZipFile(sourceFile).withCloseable { sourceZip ->
+                def missingSource = jarZip.entries().findAll { entry ->
+                    entry.name.startsWith('com/dankscripts/sgjatlantis_cityshield/') && entry.name.endsWith('.class')
+                }.collect { entry ->
+                    entry.name.replaceFirst(/\$.*/, '').replaceFirst(/\.class$/, '') + '.java'
+                }.unique().findAll { path -> sourceZip.getEntry("src/main/java/${path}") == null }
+                if (!missingSource.isEmpty()) {
+                    throw new GradleException("Release classes without published source: ${missingSource}")
+                }
+            }
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn 'verifyRendererRegistration', 'verifyReleaseJar'
+}

@@ -1,0 +1,41 @@
+newmtl body
+Kd 1 1 1
+Ka 0 0 0
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/body
+
+newmtl edge
+Kd 1 1 1
+Ka 0 0 0
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/edge
+
+newmtl bronze
+Kd 1 1 1
+Ka 0 0 0
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/bronze
+
+newmtl dark
+Kd 1 1 1
+Ka 0 0 0
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/dark
+
+newmtl amber
+Kd 1 1 1
+Ka 1 1 1
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/amber
+
+newmtl cyan
+Kd 1 1 1
+Ka 1 1 1
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/cyan
+
+newmtl white
+Kd 1 1 1
+Ka 1 1 1
+forge_TintIndex -1
+map_Kd sgjatlantis_cityshield:block/emitter/white

@@ -28,6 +28,7 @@ public final class ShieldDefinition {
     private int upperHeight = 300;
     private int lowerDepth = 40;
     private int margin = 10;
+    private int sizePercent = 100;
 
     private int committedCenterX;
     private int committedCenterY;
@@ -64,10 +65,15 @@ public final class ShieldDefinition {
     public int centerX() { return centerX; }
     public int centerY() { return centerY; }
     public int centerZ() { return centerZ; }
-    public int radiusX() { return radiusX; }
-    public int radiusZ() { return radiusZ; }
+    public int radiusX() { return scaled(radiusX, MIN_RADIUS); }
+    public int radiusZ() { return scaled(radiusZ, MIN_RADIUS); }
     public int upperHeight() { return upperHeight; }
     public int lowerDepth() { return lowerDepth; }
+    public int sizePercent() { return sizePercent; }
+    public void setSizePercent(int percent) { sizePercent = clamp(percent, 10, 100); }
+    private int scaled(int full, int minimum) {
+        return Math.max(minimum, (int) Math.round(full * sizePercent / 100.0D));
+    }
     public int margin() { return margin; }
     public boolean preview() { return preview; }
     public boolean active() { return active; }
@@ -206,6 +212,7 @@ public final class ShieldDefinition {
         tag.putInt("UpperHeight", upperHeight);
         tag.putInt("LowerDepth", lowerDepth);
         tag.putInt("Margin", margin);
+        tag.putInt("SizePercent", sizePercent);
         tag.putInt("CommittedCenterX", committedCenterX);
         tag.putInt("CommittedCenterY", committedCenterY);
         tag.putInt("CommittedCenterZ", committedCenterZ);
@@ -231,6 +238,7 @@ public final class ShieldDefinition {
         definition.upperHeight = tag.getInt("UpperHeight");
         definition.lowerDepth = tag.getInt("LowerDepth");
         definition.margin = tag.getInt("Margin");
+        definition.sizePercent = tag.contains("SizePercent") ? clamp(tag.getInt("SizePercent"), 10, 100) : 100;
         definition.committedCenterX = tag.getInt("CommittedCenterX");
         definition.committedCenterY = tag.getInt("CommittedCenterY");
         definition.committedCenterZ = tag.getInt("CommittedCenterZ");
@@ -265,6 +273,7 @@ public final class ShieldDefinition {
         restored.upperHeight = clamp(stored.upperHeight, MIN_HEIGHT, MAX_HEIGHT);
         restored.lowerDepth = clamp(stored.lowerDepth, 0, MAX_HEIGHT);
         restored.margin = clamp(stored.margin, 0, MAX_MARGIN);
+        restored.sizePercent = stored.sizePercent;
 
         restored.committedCenterX = stored.committedCenterX;
         restored.committedCenterY = stored.committedCenterY;
@@ -289,6 +298,7 @@ public final class ShieldDefinition {
         buffer.writeBoolean(dirty());
         buffer.writeBoolean(active);
         buffer.writeLong(stateChangeGameTime);
+        buffer.writeByte(sizePercent);
         buffer.writeBoolean(hasEmitter());
         if (hasEmitter()) buffer.writeLong(emitterPos);
     }
@@ -300,6 +310,7 @@ public final class ShieldDefinition {
         if (!buffer.readBoolean()) definition.commit();
         definition.active = buffer.readBoolean();
         definition.stateChangeGameTime = buffer.readLong();
+        definition.sizePercent = clamp(buffer.readUnsignedByte(), 10, 100);
         if (buffer.readBoolean()) definition.emitterPos = buffer.readLong();
         return definition;
     }

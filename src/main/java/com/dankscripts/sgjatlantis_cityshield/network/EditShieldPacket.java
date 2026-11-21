@@ -1,6 +1,7 @@
 package com.dankscripts.sgjatlantis_cityshield.network;
 
 import com.dankscripts.sgjatlantis_cityshield.block.ShieldControllerBlockEntity;
+import com.dankscripts.sgjatlantis_cityshield.config.ShieldConfig;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldDefinition;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldSavedData;
 import net.minecraft.core.BlockPos;
@@ -19,7 +20,7 @@ public record EditShieldPacket(BlockPos controllerPos, Action action, int field,
 
     @Override
     public Type<EditShieldPacket> type() { return TYPE; }
-    public enum Action { ADJUST, TOGGLE_PREVIEW, COMMIT, CANCEL, TOGGLE_ACTIVE }
+    public enum Action { ADJUST, TOGGLE_PREVIEW, COMMIT, CANCEL, TOGGLE_ACTIVE, SET_SIZE_PERCENT }
 
     public static void encode(EditShieldPacket packet, FriendlyByteBuf buffer) {
         buffer.writeBlockPos(packet.controllerPos);
@@ -39,6 +40,7 @@ public record EditShieldPacket(BlockPos controllerPos, Action action, int field,
             ShieldDefinition definition = data.find(player.level(), packet.controllerPos);
             if (definition == null) return;
             switch (packet.action) {
+                case SET_SIZE_PERCENT -> definition.setSizePercent(packet.amount);
                 case ADJUST -> {
                     if (definition.active()) return;
                     if (packet.field < 0 || packet.field > 7) return;
@@ -55,6 +57,11 @@ public record EditShieldPacket(BlockPos controllerPos, Action action, int field,
                     if (!definition.active()) definition.cancel();
                 }
                 case TOGGLE_ACTIVE -> {
+                    if (ShieldConfig.REDSTONE_MODE.get() != ShieldConfig.RedstoneMode.DISABLED) {
+                        player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                                "message.sgjatlantis_cityshield.redstone_controlled"), true);
+                        return;
+                    }
                     if (!(player.level().getBlockEntity(packet.controllerPos) instanceof ShieldControllerBlockEntity controller)) {
                         return;
                     }

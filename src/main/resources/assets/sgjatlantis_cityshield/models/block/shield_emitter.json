@@ -1,42 +1,89 @@
 {
   "parent": "minecraft:block/block",
+  "loader": "neoforge:obj",
+  "model": "sgjatlantis_cityshield:models/block/shield_emitter.obj",
+  "automatic_culling": false,
+  "shade_quads": true,
+  "emissive_ambient": true,
+  "flip_v": false,
   "textures": {
-    "body": "minecraft:block/dark_prismarine",
-    "trim": "minecraft:block/prismarine_bricks",
-    "light": "minecraft:block/sea_lantern",
-    "particle": "minecraft:block/dark_prismarine"
+    "particle": "sgjatlantis_cityshield:block/emitter/body"
   },
-  "elements": [
-    {
-      "from": [1, 0, 1], "to": [15, 3, 15],
-      "faces": {
-        "down": {"texture": "#body", "cullface": "down"}, "up": {"texture": "#trim"},
-        "north": {"texture": "#body"}, "south": {"texture": "#body"},
-        "west": {"texture": "#body"}, "east": {"texture": "#body"}
-      }
-    },
-    {
-      "from": [3, 3, 3], "to": [13, 12, 13],
-      "faces": {
-        "down": {"texture": "#body"}, "up": {"texture": "#light"},
-        "north": {"texture": "#trim"}, "south": {"texture": "#trim"},
-        "west": {"texture": "#trim"}, "east": {"texture": "#trim"}
-      }
-    },
-    {
-      "from": [1, 12, 1], "to": [15, 16, 15],
-      "faces": {
-        "down": {"texture": "#body"}, "up": {"texture": "#light"},
-        "north": {"texture": "#body"}, "south": {"texture": "#body"},
-        "west": {"texture": "#body"}, "east": {"texture": "#body"}
-      }
-    }
-  ],
   "display": {
-    "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
-    "ground": {"translation": [0, 3, 0], "scale": [0.25, 0.25, 0.25]},
-    "fixed": {"scale": [0.5, 0.5, 0.5]},
-    "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
-    "firstperson_righthand": {"rotation": [0, 45, 0], "scale": [0.4, 0.4, 0.4]}
+    "gui": {
+      "rotation": [
+        25,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.72,
+        0.72,
+        0.72
+      ]
+    },
+    "ground": {
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.65,
+        0.65,
+        0.65
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.45,
+        0.45,
+        0.45
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
+    }
   }
 }

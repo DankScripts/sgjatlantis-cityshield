@@ -103,6 +103,7 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
     public boolean preview() { return data.get(8) != 0; }
     public boolean dirty() { return data.get(9) != 0; }
     public boolean active() { return data.get(10) != 0; }
+    public int sizePercent() { return data.get(25); }
     public boolean largeCableConnected() { return data.get(11) != 0; }
     public boolean zeroPointPowerAvailable() { return data.get(12) != 0; }
     public long currentPowerDraw() { return readLong(13); }
@@ -142,6 +143,7 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
                 if (index >= 21 && index <= 24) {
                     return word(connectedZpmCapacity.getAsLong(), index - 21);
                 }
+                if (index == 25) return definition.sizePercent();
                 return 0;
             }
 
