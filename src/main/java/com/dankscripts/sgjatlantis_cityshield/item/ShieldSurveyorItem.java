@@ -2,6 +2,7 @@ package com.dankscripts.sgjatlantis_cityshield.item;
 
 import com.dankscripts.sgjatlantis_cityshield.block.ShieldControllerBlockEntity;
 import com.dankscripts.sgjatlantis_cityshield.menu.ShieldControllerMenu;
+import com.dankscripts.sgjatlantis_cityshield.shield.ShieldControlAccess;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldDefinition;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldSavedData;
 import com.dankscripts.sgjatlantis_cityshield.shield.SurveyMark;
@@ -20,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public final class ShieldSurveyorItem extends Item {
         if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) {
             return InteractionResult.SUCCESS;
         }
-        if (!serverPlayer.hasPermissions(2)) {
+        if (!ShieldControlAccess.canEdit(serverPlayer)) {
             serverPlayer.displayClientMessage(Component.translatable("message.sgjatlantis_cityshield.operator_only"), true);
             return InteractionResult.CONSUME;
         }
@@ -95,7 +95,7 @@ public final class ShieldSurveyorItem extends Item {
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
         }
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            if (!serverPlayer.hasPermissions(2)) {
+            if (!ShieldControlAccess.canEdit(serverPlayer)) {
                 serverPlayer.displayClientMessage(Component.translatable("message.sgjatlantis_cityshield.operator_only"), true);
                 return InteractionResultHolder.consume(stack);
             }
@@ -122,12 +122,12 @@ public final class ShieldSurveyorItem extends Item {
                 serverPlayer.displayClientMessage(Component.translatable("message.sgjatlantis_cityshield.missing_controller"), true);
                 return InteractionResultHolder.consume(stack);
             }
-            NetworkHooks.openScreen(serverPlayer,
+            ShieldControllerMenu.open(serverPlayer,
                     new SimpleMenuProvider((containerId, inventory, menuPlayer) ->
                             new ShieldControllerMenu(containerId, inventory, controllerPos,
                                     controller.createDataAccess()),
                             Component.translatable("container.sgjatlantis_cityshield.shield_controller")),
-                    buffer -> buffer.writeBlockPos(controllerPos));
+                    controllerPos);
             return InteractionResultHolder.consume(stack);
         }
         return InteractionResultHolder.pass(stack);

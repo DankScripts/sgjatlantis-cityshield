@@ -5,6 +5,8 @@ import com.dankscripts.sgjatlantis_cityshield.network.EditShieldPacket;
 import com.dankscripts.sgjatlantis_cityshield.network.ModNetwork;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -35,14 +37,15 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
     private Button backButton;
     private Button upgradesButton;
     private Button upgradesBackButton;
+    private ShieldSizeSlider sizeSlider;
     private boolean settingsOpen;
     private final List<Button> geometryButtons = new ArrayList<>();
-    private final List<Button> settingsWidgets = new ArrayList<>();
+    private final List<AbstractWidget> settingsWidgets = new ArrayList<>();
 
     public ShieldControllerScreen(ShieldControllerMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 310;
-        imageHeight = 288;
+        imageHeight = 320;
         titleLabelX = 10;
         titleLabelY = 8;
         inventoryLabelY = 1000;
@@ -67,25 +70,26 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
             settingsWidgets.add(plus);
         }
 
+        sizeSlider = addRenderableWidget(new ShieldSizeSlider(leftPos + 36, topPos + 194, 238, 20,
+                menu.sizePercent()));
         stepButton = addRenderableWidget(Button.builder(stepLabel(), button -> cycleStep())
-                .bounds(leftPos + 200, topPos + 192, 68, 20).build());
+                .bounds(leftPos + 200, topPos + 224, 68, 20).build());
         settingsWidgets.add(stepButton);
         previewButton = addRenderableWidget(Button.builder(previewLabel(), button -> send(EditShieldPacket.Action.TOGGLE_PREVIEW, 0, 0))
-                .bounds(leftPos + 10, topPos + 192, 82, 20).build());
+                .bounds(leftPos + 10, topPos + 224, 82, 20).build());
         settingsWidgets.add(previewButton);
         commitButton = addRenderableWidget(Button.builder(Component.translatable("screen.sgjatlantis_cityshield.commit"),
                         button -> send(EditShieldPacket.Action.COMMIT, 0, 0))
-                .bounds(leftPos + 10, topPos + 216, 90, 20).build());
+                .bounds(leftPos + 10, topPos + 248, 90, 20).build());
         settingsWidgets.add(commitButton);
         cancelButton = addRenderableWidget(Button.builder(Component.translatable("screen.sgjatlantis_cityshield.cancel"),
                         button -> send(EditShieldPacket.Action.CANCEL, 0, 0))
-                .bounds(leftPos + 106, topPos + 216, 90, 20).build());
+                .bounds(leftPos + 106, topPos + 248, 90, 20).build());
         settingsWidgets.add(cancelButton);
         backButton = addRenderableWidget(Button.builder(
                         Component.translatable("screen.sgjatlantis_cityshield.back_to_control"),
                         button -> setSettingsOpen(false))
-                .bounds(leftPos + 200, topPos + 216, 68, 20).build());
-        settingsWidgets.add(backButton);
+                .bounds(leftPos + 200, topPos + 248, 68, 20).build());
 
         activeButton = addRenderableWidget(Button.builder(activeLabel(),
                         button -> send(EditShieldPacket.Action.TOGGLE_ACTIVE, 0, 0))
@@ -122,15 +126,18 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
     private void updatePageVisibility() {
         boolean upgrades = menu.upgradesOpen();
         boolean operator = menu.operatorControls();
-        settingsWidgets.forEach(button -> button.visible = settingsOpen && !upgrades && operator);
-        if (activeButton != null) activeButton.visible = !settingsOpen && !upgrades && operator;
-        if (settingsButton != null) settingsButton.visible = !settingsOpen && !upgrades && operator;
+        boolean showSettings = settingsOpen && !upgrades;
+        settingsWidgets.forEach(button -> button.visible = showSettings && operator);
+        if (sizeSlider != null) sizeSlider.visible = showSettings;
+        if (backButton != null) backButton.visible = showSettings;
+        if (activeButton != null) activeButton.visible = !settingsOpen && !upgrades;
+        if (settingsButton != null) settingsButton.visible = !settingsOpen && !upgrades;
         if (upgradesButton != null) {
             upgradesButton.visible = !settingsOpen && !upgrades;
             upgradesButton.active = minecraft != null && minecraft.player != null
                     && menu.canUseUpgrades(minecraft.player);
         }
-        if (upgradesBackButton != null) upgradesBackButton.visible = upgrades && operator;
+        if (upgradesBackButton != null) upgradesBackButton.visible = upgrades;
     }
 
     private void adjust(int field, int amount) {
@@ -144,6 +151,45 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
     private void cycleStep() {
         step = step == 1 ? 10 : step == 10 ? 50 : step == 50 ? 100 : step == 100 ? 250 : 1;
         stepButton.setMessage(stepLabel());
+    }
+
+    private final class ShieldSizeSlider extends AbstractSliderButton {
+        private boolean pressed;
+        private ShieldSizeSlider(int x, int y, int width, int height, int percent) {
+            super(x, y, width, height, Component.empty(),
+                    (Math.max(10, Math.min(100, percent)) - 10) / 90.0D);
+            updateMessage();
+        }
+
+        private int percent() { return 10 + (int) Math.round(value * 90.0D); }
+
+        private void syncFromServer(int percent) {
+            if (pressed || percent < 10 || percent > 100 || percent == percent()) return;
+            value = (percent - 10) / 90.0D;
+            updateMessage();
+        }
+
+        @Override protected void updateMessage() {
+            setMessage(Component.translatable("screen.sgjatlantis_cityshield.size", percent()));
+        }
+
+        @Override protected void applyValue() {
+            // Send the chosen size once on release instead of flooding shield updates while dragging.
+        }
+
+        @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            boolean clicked = super.mouseClicked(mouseX, mouseY, button);
+            pressed = clicked && button == 0;
+            return clicked;
+        }
+
+        @Override public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            boolean released = super.mouseReleased(mouseX, mouseY, button);
+            if (button == 0 && pressed && visible && settingsOpen)
+                send(EditShieldPacket.Action.SET_SIZE_PERCENT, 0, percent());
+            pressed = false;
+            return released;
+        }
     }
 
     private Component stepLabel() {
@@ -165,6 +211,7 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
     @Override
     protected void containerTick() {
         super.containerTick();
+        if (sizeSlider != null) sizeSlider.syncFromServer(menu.sizePercent());
         if (previewButton != null) previewButton.setMessage(previewLabel());
         if (activeButton != null) activeButton.setMessage(activeLabel());
         boolean editable = !menu.active();
@@ -215,14 +262,19 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
             if (menu.active()) graphics.drawCenteredString(font,
                     Component.translatable("screen.sgjatlantis_cityshield.range_warning"), imageWidth / 2, 122, 0xFFD36A);
         } else if (settingsOpen) {
-            int startY = 32;
-            for (int field = 0; field < LABELS.length; field++) {
-                int y = startY + field * 20;
-                graphics.drawString(font, LABELS[field], 10, y, 0xBDECF4, false);
-                String value = Integer.toString(menu.field(field));
-                graphics.drawString(font, value, 186 - font.width(value), y, 0xFFFFFF, false);
+            if (menu.operatorControls()) {
+                int startY = 32;
+                for (int field = 0; field < LABELS.length; field++) {
+                    int y = startY + field * 20;
+                    graphics.drawString(font, LABELS[field], 10, y, 0xBDECF4, false);
+                    String value = Integer.toString(menu.field(field));
+                    graphics.drawString(font, value, 186 - font.width(value), y, 0xFFFFFF, false);
+                }
+            } else {
+                graphics.drawCenteredString(font, Component.translatable("screen.sgjatlantis_cityshield.scale_only_hint"),
+                        imageWidth / 2, 170, 0x83AEB8);
             }
-            graphics.drawString(font, status, 10, 244, statusColor, false);
+            graphics.drawString(font, status, 10, 276, statusColor, false);
         } else {
             Component controlTitle = Component.translatable(menu.active()
                     ? "screen.sgjatlantis_cityshield.field_online"
@@ -231,27 +283,29 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
             graphics.drawCenteredString(font, controlTitle, imageWidth / 2, 47, controlColor);
             graphics.drawCenteredString(font, status, imageWidth / 2, 68, statusColor);
             graphics.drawCenteredString(font,
-                    Component.translatable("screen.sgjatlantis_cityshield.control_hint"),
+                    Component.translatable(menu.operatorControls()
+                            ? "screen.sgjatlantis_cityshield.control_hint"
+                            : "screen.sgjatlantis_cityshield.scale_hint"),
                     imageWidth / 2, 88, 0x83AEB8);
             renderPowerMonitor(graphics);
         }
 
         graphics.drawString(font, Component.translatable("screen.sgjatlantis_cityshield.large_cable"),
-                10, 258, 0xBDECF4, false);
+                10, 290, 0xBDECF4, false);
         Component cableStatus = Component.translatable(menu.largeCableConnected()
                 ? "screen.sgjatlantis_cityshield.cable_connected"
                 : "screen.sgjatlantis_cityshield.cable_missing");
         int cableColor = menu.largeCableConnected() ? 0x6AFFB7 : 0xFF765F;
-        graphics.drawString(font, cableStatus, imageWidth - 10 - font.width(cableStatus), 258,
+        graphics.drawString(font, cableStatus, imageWidth - 10 - font.width(cableStatus), 290,
                 cableColor, false);
 
         graphics.drawString(font, Component.translatable("screen.sgjatlantis_cityshield.zero_point_grid"),
-                10, 270, 0xBDECF4, false);
+                10, 302, 0xBDECF4, false);
         Component powerStatus = Component.translatable(menu.zeroPointPowerAvailable()
                 ? "screen.sgjatlantis_cityshield.grid_ready"
                 : "screen.sgjatlantis_cityshield.grid_unpowered");
         int powerColor = menu.zeroPointPowerAvailable() ? 0x6AFFB7 : 0xFF765F;
-        graphics.drawString(font, powerStatus, imageWidth - 10 - font.width(powerStatus), 270,
+        graphics.drawString(font, powerStatus, imageWidth - 10 - font.width(powerStatus), 302,
                 powerColor, false);
     }
 
@@ -266,7 +320,7 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
                 Component.translatable("screen.sgjatlantis_cityshield.power_monitor"),
                 52, 208, 0x77EDFF, false);
 
-        String runtime = formatRuntime(stored, draw);
+        String runtime = capacity > 0L ? formatRuntime(stored, draw) : "--";
         graphics.drawString(font, runtime, 258 - font.width(runtime), 208,
                 draw > 0L ? 0xFFD36A : 0xA7CBD1, false);
 
@@ -279,8 +333,10 @@ public final class ShieldControllerScreen extends AbstractContainerScreen<Shield
         drawMonitorLine(graphics, 230,
                 Component.translatable("screen.sgjatlantis_cityshield.zpm_supply"),
                 capacity > 0L ? formatEnergy(stored) : Component.translatable(
-                        "screen.sgjatlantis_cityshield.unavailable").getString(),
-                capacity > 0L ? 0xBDECF4 : 0xFF765F);
+                        menu.zeroPointPowerAvailable()
+                                ? "screen.sgjatlantis_cityshield.unmeasured_supply"
+                                : "screen.sgjatlantis_cityshield.unavailable").getString(),
+                capacity > 0L ? 0xBDECF4 : menu.zeroPointPowerAvailable() ? 0xA7CBD1 : 0xFF765F);
         drawMonitorLine(graphics, 242,
                 Component.translatable("screen.sgjatlantis_cityshield.live_draw"),
                 formatEnergy(draw) + "/t", draw > 0L ? 0x6AFFB7 : 0xA7CBD1);

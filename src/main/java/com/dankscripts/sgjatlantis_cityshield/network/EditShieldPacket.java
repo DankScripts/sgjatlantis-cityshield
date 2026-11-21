@@ -1,6 +1,9 @@
 package com.dankscripts.sgjatlantis_cityshield.network;
 
 import com.dankscripts.sgjatlantis_cityshield.block.ShieldControllerBlockEntity;
+import com.dankscripts.sgjatlantis_cityshield.config.ShieldConfig;
+import com.dankscripts.sgjatlantis_cityshield.menu.ShieldControllerMenu;
+import com.dankscripts.sgjatlantis_cityshield.shield.ShieldControlAccess;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldDefinition;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldSavedData;
 import net.minecraft.core.BlockPos;
@@ -11,7 +14,7 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public record EditShieldPacket(BlockPos controllerPos, Action action, int field, int amount) {
-    public enum Action { ADJUST, TOGGLE_PREVIEW, COMMIT, CANCEL, TOGGLE_ACTIVE }
+    public enum Action { ADJUST, TOGGLE_PREVIEW, COMMIT, CANCEL, TOGGLE_ACTIVE, SET_SIZE_PERCENT }
 
     public static void encode(EditShieldPacket packet, FriendlyByteBuf buffer) {
         buffer.writeBlockPos(packet.controllerPos);
@@ -28,11 +31,24 @@ public record EditShieldPacket(BlockPos controllerPos, Action action, int field,
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
-            if (player == null || !player.hasPermissions(2)) return;
+            if (player == null) return;
+            boolean localControl = player.containerMenu instanceof ShieldControllerMenu menu
+                    && menu.controllerPos().equals(packet.controllerPos)
+                    && menu.canUseUpgrades(player);
+            boolean allowed = switch (packet.action) {
+                case SET_SIZE_PERCENT, TOGGLE_ACTIVE -> localControl || ShieldControlAccess.canEdit(player);
+                default -> ShieldControlAccess.canEdit(player);
+            };
+            if (!allowed) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                        "message.sgjatlantis_cityshield.control_denied"), true);
+                return;
+            }
             ShieldSavedData data = ShieldSavedData.get(player.server);
             ShieldDefinition definition = data.find(player.level(), packet.controllerPos);
             if (definition == null) return;
             switch (packet.action) {
+                case SET_SIZE_PERCENT -> definition.setSizePercent(packet.amount);
                 case ADJUST -> {
                     if (definition.active()) return;
                     if (packet.field < 0 || packet.field > 7) return;
@@ -49,6 +65,11 @@ public record EditShieldPacket(BlockPos controllerPos, Action action, int field,
                     if (!definition.active()) definition.cancel();
                 }
                 case TOGGLE_ACTIVE -> {
+                    if (ShieldConfig.REDSTONE_MODE.get() != ShieldConfig.RedstoneMode.DISABLED) {
+                        player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                                "message.sgjatlantis_cityshield.redstone_controlled"), true);
+                        return;
+                    }
                     if (!(player.level().getBlockEntity(packet.controllerPos) instanceof ShieldControllerBlockEntity controller)) {
                         return;
                     }

@@ -21,10 +21,26 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public final class ShieldEmitterBlock extends BaseEntityBlock {
+    // Rounded, stepped envelope of the baked emitter, wholly inside its block.
     private static final VoxelShape SHAPE = Shapes.or(
-            box(1.0, 0.0, 1.0, 15.0, 3.0, 15.0),
-            box(3.0, 3.0, 3.0, 13.0, 12.0, 13.0),
-            box(1.0, 12.0, 1.0, 15.0, 16.0, 15.0));
+            roundSection(7.6, 0.0, 2.5),
+            roundSection(5.9, 2.5, 7.5),
+            roundSection(4.3, 7.5, 10.0),
+            roundSection(3.0, 10.0, 13.5),
+            roundSection(1.8, 13.5, 16.0)).optimize();
+
+    private static VoxelShape roundSection(double radius, double bottom, double top) {
+        VoxelShape result = Shapes.empty();
+        for (int strip = 0; strip < 12; strip++) {
+            double left = -radius + 2.0 * radius * strip / 12.0;
+            double right = -radius + 2.0 * radius * (strip + 1) / 12.0;
+            double midpoint = (left + right) * 0.5;
+            double reach = Math.sqrt(radius * radius - midpoint * midpoint);
+            result = Shapes.or(result, box(8.0 + left, bottom, 8.0 - reach,
+                    8.0 + right, top, 8.0 + reach));
+        }
+        return result;
+    }
 
     public ShieldEmitterBlock(Properties properties) { super(properties); }
 

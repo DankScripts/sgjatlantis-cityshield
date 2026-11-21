@@ -2,11 +2,14 @@ package com.dankscripts.sgjatlantis_cityshield.menu;
 
 import com.dankscripts.sgjatlantis_cityshield.block.ShieldControllerBlockEntity;
 import com.dankscripts.sgjatlantis_cityshield.registry.ModMenus;
+import com.dankscripts.sgjatlantis_cityshield.shield.ShieldControlAccess;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldDefinition;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldSavedData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +19,7 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraftforge.network.NetworkHooks;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
@@ -24,20 +28,26 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
     private final BlockPos controllerPos;
     private final ContainerData data;
     private final Player viewer;
+    private final boolean serverGrantedOperatorControls;
     private boolean upgradesOpen;
     private static final int UPGRADE_SLOTS = 8;
 
     public ShieldControllerMenu(int containerId, Inventory inventory, FriendlyByteBuf buffer) {
         this(containerId, inventory, buffer.readBlockPos(),
-                new SimpleContainerData(ShieldControllerBlockEntity.DATA_COUNT));
+                new SimpleContainerData(ShieldControllerBlockEntity.DATA_COUNT), buffer.readBoolean());
     }
 
     public ShieldControllerMenu(int containerId, Inventory inventory, BlockPos controllerPos, ContainerData data) {
+        this(containerId, inventory, controllerPos, data, ShieldControlAccess.canEdit(inventory.player));
+    }
+
+    private ShieldControllerMenu(int containerId, Inventory inventory, BlockPos controllerPos, ContainerData data,
+                                 boolean serverGrantedOperatorControls) {
         super(ModMenus.SHIELD_CONTROLLER.get(), containerId);
         this.controllerPos = controllerPos;
         this.data = data;
         this.viewer = inventory.player;
-        this.upgradesOpen = !viewer.hasPermissions(2);
+        this.serverGrantedOperatorControls = serverGrantedOperatorControls;
         checkContainerDataCount(data, ShieldControllerBlockEntity.DATA_COUNT);
         addDataSlots(data);
         Container crystals = !viewer.level().isClientSide
@@ -57,8 +67,17 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
         }
     }
 
+    public static void open(ServerPlayer player, MenuProvider provider, BlockPos controllerPos) {
+        NetworkHooks.openScreen(player, provider, buffer -> {
+            buffer.writeBlockPos(controllerPos);
+            buffer.writeBoolean(ShieldControlAccess.canEdit(player));
+        });
+    }
+
     public boolean upgradesOpen() { return upgradesOpen; }
-    public boolean operatorControls() { return viewer.hasPermissions(2); }
+    public boolean operatorControls() {
+        return viewer.level().isClientSide ? serverGrantedOperatorControls : ShieldControlAccess.canEdit(viewer);
+    }
     public boolean canUseUpgrades(Player player) {
         return player.level().getBlockEntity(controllerPos) instanceof ShieldControllerBlockEntity
                 && player.distanceToSqr(controllerPos.getX() + 0.5,
@@ -74,7 +93,7 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
     @Override public boolean clickMenuButton(Player player, int id) {
         if (!stillValid(player)) return false;
         if (id == 1 && canUseUpgrades(player)) upgradesOpen = true;
-        else if (id == 0 && player.hasPermissions(2)) upgradesOpen = false;
+        else if (id == 0) upgradesOpen = false;
         else return false;
         return true;
     }
@@ -103,6 +122,7 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
     public boolean preview() { return data.get(8) != 0; }
     public boolean dirty() { return data.get(9) != 0; }
     public boolean active() { return data.get(10) != 0; }
+    public int sizePercent() { return data.get(25); }
     public boolean largeCableConnected() { return data.get(11) != 0; }
     public boolean zeroPointPowerAvailable() { return data.get(12) != 0; }
     public long currentPowerDraw() { return readLong(13); }
@@ -142,6 +162,7 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
                 if (index >= 21 && index <= 24) {
                     return word(connectedZpmCapacity.getAsLong(), index - 21);
                 }
+                if (index == 25) return definition.sizePercent();
                 return 0;
             }
 
@@ -164,7 +185,7 @@ public final class ShieldControllerMenu extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         if (canUseUpgrades(player)) return true;
-        if (!player.hasPermissions(2) || !(player.level() instanceof ServerLevel serverLevel)) return false;
+        if (!ShieldControlAccess.canEdit(player) || !(player.level() instanceof ServerLevel serverLevel)) return false;
         return ShieldSavedData.get(serverLevel.getServer()).find(serverLevel, controllerPos) != null;
     }
 

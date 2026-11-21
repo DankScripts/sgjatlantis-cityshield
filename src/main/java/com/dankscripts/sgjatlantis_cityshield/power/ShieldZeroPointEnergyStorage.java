@@ -10,6 +10,7 @@ import net.povstalec.sgjourney.common.capabilities.SGJourneyEnergy;
  */
 public final class ShieldZeroPointEnergyStorage extends SGJourneyEnergy {
     private final Runnable changed;
+    private long requiredDraw = currentDraw();
 
     public ShieldZeroPointEnergyStorage(Runnable changed) {
         super(currentDraw(), currentDraw(), 0L);
@@ -43,11 +44,16 @@ public final class ShieldZeroPointEnergyStorage extends SGJourneyEnergy {
 
     public long consumeTick() {
         syncLimits();
-        return depleteEnergy(currentDraw(), false);
+        return depleteEnergy(requiredDraw, false);
     }
 
     public long requiredPerTick() {
-        return currentDraw();
+        return requiredDraw;
+    }
+
+    public void setRequiredPerTick(long draw) {
+        requiredDraw = Math.max(1L, draw);
+        syncLimits();
     }
 
     public boolean hasPower() {
@@ -61,7 +67,7 @@ public final class ShieldZeroPointEnergyStorage extends SGJourneyEnergy {
     }
 
     private void syncLimits() {
-        long draw = currentDraw();
+        long draw = requiredDraw;
         capacity = draw;
         maxReceive = draw;
         maxExtract = 0L;

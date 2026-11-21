@@ -29,7 +29,7 @@ public final class ModBlocks {
                     })));
 
     public static final RegistryObject<Block> SHIELD_EMITTER = BLOCKS.register("shield_emitter",
-            () -> new ShieldEmitterBlock(BlockBehaviour.Properties.of()
+            () -> new ShieldEmitterBlock(BlockBehaviour.Properties.of().noOcclusion()
                     .mapColor(MapColor.COLOR_CYAN)
                     .strength(4.0F, 12.0F)
                     .sound(SoundType.METAL)

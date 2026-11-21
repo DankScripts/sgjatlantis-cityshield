@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Allows the two production-prop angles used by the shield controller model. */
+/** Allows the production-prop angles used by the shield controller model. */
 @Mixin(targets = "net.minecraft.client.renderer.block.model.BlockElement$Deserializer", remap = false)
 public abstract class ShieldControllerModelAngleMixin {
     @Inject(method = "m_111342_", at = @At("HEAD"), cancellable = true, remap = false)
@@ -14,7 +14,10 @@ public abstract class ShieldControllerModelAngleMixin {
                                                               CallbackInfoReturnable<Float> callback) {
         if (json == null || !json.has("angle")) return;
         float angle = json.get("angle").getAsFloat();
-        if (near(angle, -8.0F) || near(angle, -35.0F)) callback.setReturnValue(angle);
+        if (near(angle, -8.0F) || near(angle, -35.0F)
+                || near(angle, -18.0F) || near(angle, 18.0F)) {
+            callback.setReturnValue(angle);
+        }
     }
 
     private static boolean near(float value, float expected) {

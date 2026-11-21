@@ -1,25 +1,25 @@
-# Atlantis City Shield
+# Atlantis City Shield 1.0.4
 
 ## Source Branches
 
 - [Forge 1.20.1](https://github.com/DankScripts/sgjatlantis-cityshield/tree/1.20.1-forge)
 - [NeoForge 1.21.1](https://github.com/DankScripts/sgjatlantis-cityshield/tree/1.21.1-neoforge)
 
-The `main` branch contains the Forge 1.20.1 release sources.
+Use the loader-specific source branches above.
 
-## v1.0.2 release
+## v1.0.4 release
 
-Forge 1.20.1 release for SGJourney 0.6.50 or newer, requiring Java 17.
+Forge 1.20.1 release built against the supplied SGJourney 0.6.55-alpha, requiring Java 17.
 Uses the native ZPM Hub zero-point energy API even when optional item energy
 capabilities are disabled. The user-confirmed table visuals, survey system,
 shield defenses, weather barrier, and default 100,000,000 FE/t draw are retained.
-The separate NeoForge 1.21.1 release also carries version 1.0.2.
+The separate NeoForge 1.21.1 release also carries version 1.0.4.
 
 ## v1.0.1-beta.2 baseline
 
-This source matches the accepted Forge 1.20.1 Beta 2 release baseline locked on
-2026-09-03. The exact runtime JAR and checksums are stored in
-`baseline/accepted-balanced-bars/`. Its powered rear lightbar uses full client
+The historical Forge 1.20.1 Beta 2 baseline was locked on 2026-09-03.
+It is a preservation reference, not a build dependency or part of the source ZIP.
+Its powered rear lightbar uses full client
 lighting on only its four visible bar faces, while standby appearance and shield
 mechanics remain unchanged. The shield control table passively monitors the
 complete energy and live draw of all unique ZPM Hubs on the shield emitter's
@@ -30,10 +30,51 @@ change the configured shield drain, whose default remains 100,000,000 FE/t.
 
 Standalone Forge 1.20.1 mod for fitting, powering, and operating a city-scale Atlantis shield.
 
+## Power and redstone
+
+Power draw now scales with the surveyed ellipsoid volume. The original
+500 x 500 radius, 340-block-height field uses the configured base draw;
+shrinking it reduces draw down to a 1% minimum. Set
+`power.scaleDrawByVolume=false` for fixed draw.
+
+For survival power without a ZPM, attach FE generators or cables directly to
+the Shield Emitter. This route is enabled by `power.allowGeneratorPower`.
+The standard-size shield needs 100,000 FE/t, capped at 25,000 FE/t per face,
+so four powered faces are required at default settings. Both values are
+configurable in the server TOML. The existing ZPM Hub route remains available.
+
+Set `redstone.mode` to `HIGH_ENABLE` or `HIGH_DISABLE` to control the shield
+from a redstone signal at the controller. `DISABLED` keeps manual GUI control.
+Activation still requires a linked emitter and power.
+Natural and chunk-generation mob spawns are blocked inside a fully formed,
+active shield. Existing mobs and spawner-created mobs are unaffected.
+
+The controller table's Shield Settings page has a live shield-envelope slider
+from 10% to 100%. It scales the saved horizontal radii around the surveyed
+center, including while the shield is active. The surveyed top and bottom
+heights stay intact so the upper spire remains covered. Returning to
+100% restores the surveyed full-city shape. The smaller enclosed volume also
+reduces power draw when volume scaling is enabled. Set the surveyed center at
+the central spire for a spire-focused minimum envelope.
+
 ## Build
 
-Run `./gradlew release`. The reobfuscated mod JAR is written to `build/libs/`
-and the complete source archive is written to `dist/`.
+Select Java 17 and provide the matching SGJourney 1.20.1 0.6.55-alpha binary:
+
+```powershell
+$env:SGJOURNEY_JAR = 'C:\path\to\Stargate Journey-1.20.1-0.6.55-alpha.jar'
+.\gradlew.bat clean release
+```
+
+Alternatively, place that supplied binary in `libs/` with the filename shown
+above. It is a private release sent by Povstalec and is not bundled, downloaded
+from a public Maven coordinate, or replaced with the older 0.6.50 release.
+Revalidate against the public beta when its binary becomes available.
+
+The reobfuscated mod JAR is written to `build/libs/` and the complete source
+archive to `dist/`. The build checks client renderer event registration and
+requires Java source in the source ZIP for every packaged owned class. These
+checks do not launch Minecraft or certify a new in-game test.
 
 ## 0.1.0-alpha.31
 
@@ -375,7 +416,7 @@ This remains a power-free visual alpha. FE/ZPM drain, protection, impacts, damag
 Alpha 1 deliberately focuses on geometry setup:
 
 - Place an **Atlantis Shield Controller**.
-- Right-click it as an operator to open setup.
+- Right-click it to open the main page. All players can use Activate/Deactivate, Crystal Controls, and the Shield Settings scale slider.
 - Turn Preview on and adjust center X/Y/Z, Radius X/Z, Upper Height, Lower Depth, and measuring margin.
 - Choose a step size of 1, 10, or 50 blocks for manual adjustments.
 - Commit saves the working geometry; Cancel returns to the last committed geometry.
@@ -387,4 +428,4 @@ Alpha 1 deliberately focuses on geometry setup:
 
 The preview is client-rendered and does not place shield blocks, force-load the city, consume power, or provide protection.
 
-Both server and clients need the mod. The controller and Surveyor are operator-only setup tools in this alpha.
+Both server and clients need the same mod build. The local single-player host has full controls even with cheats disabled. On servers, operator permission level 2 is required for geometry, preview, commit/cancel, and the Surveyor, but not for normal controls at a nearby table.

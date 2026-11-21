@@ -72,7 +72,7 @@ public final class LargeNaquadahCablePowerBridge {
         long stored = 0L;
         long capacity = 0L;
         for (PowerRoute route : routes) {
-            ZeroPointEnergy zpm = zeroPointEnergy(route.hub());
+            ZeroPointEnergy zpm = zeroPointEnergy(route);
             if (zpm == null) continue;
             stored = saturatedAdd(stored, Math.max(0L, totalRemainingEnergy(zpm)));
             capacity = saturatedAdd(capacity, Math.max(0L, totalEnergyCapacity(zpm)));
@@ -91,11 +91,11 @@ public final class LargeNaquadahCablePowerBridge {
             long missing = destination.remainingCapacity();
             if (missing <= 0L) break;
 
-            ZeroPointEnergy zpm = zeroPointEnergy(route.hub());
+            ZeroPointEnergy zpm = zeroPointEnergy(route);
             if (zpm == null) continue;
 
             long transferLimit = Math.min(route.inputCable().maxTransfer(),
-                    Math.min(route.hubCable().maxTransfer(), route.hub().getMaxEnergyExtract()));
+                    Math.min(route.hubCable().maxTransfer(), net.povstalec.sgjourney.common.config.CommonZPMConfig.zpm_hub_max_transfer.get()));
             long requested = Math.min(missing, transferLimit);
             long simulatedExtract = zpm.extractLongEnergy(requested, true);
             long accepted = destination.receiveZeroPointEnergy(simulatedExtract, true);
@@ -113,10 +113,10 @@ public final class LargeNaquadahCablePowerBridge {
 
     private boolean anyRouteHasPower() {
         for (PowerRoute route : routes) {
-            ZeroPointEnergy zpm = zeroPointEnergy(route.hub());
+            ZeroPointEnergy zpm = zeroPointEnergy(route);
             if (zpm == null) continue;
             long transferLimit = Math.min(route.inputCable().maxTransfer(),
-                    Math.min(route.hubCable().maxTransfer(), route.hub().getMaxEnergyExtract()));
+                    Math.min(route.hubCable().maxTransfer(), net.povstalec.sgjourney.common.config.CommonZPMConfig.zpm_hub_max_transfer.get()));
             if (transferLimit > 0L && zpm.extractLongEnergy(1L, true) > 0L) return true;
         }
         return false;
@@ -144,8 +144,13 @@ public final class LargeNaquadahCablePowerBridge {
                 BlockPos hubPos = hubCable.getBlockPos().above();
                 if (!discoveredHubs.add(hubPos)) continue;
                 BlockEntity blockEntity = level.getBlockEntity(hubPos);
-                if (blockEntity instanceof ZPMHubEntity hub) {
-                    routes.add(new PowerRoute(inputPos, inputCable, hubCable, hub));
+                if (blockEntity != null) {
+                    IItemHandler inventory = hubInventory(blockEntity);
+                    if (inventory == null) continue;
+                    for (int slot = 0; slot < inventory.getSlots(); slot++) {
+                        routes.add(new PowerRoute(inputPos, inputCable, hubCable, blockEntity, slot));
+                    }
+
                 }
             }
         }
@@ -186,11 +191,32 @@ public final class LargeNaquadahCablePowerBridge {
                 level.getBlockState(pos).getBlock()));
     }
 
-    private static ZeroPointEnergy zeroPointEnergy(ZPMHubEntity hub) {
-        IItemHandler inventory = hub.getItemHandler().resolve().orElse(null);
-        if (inventory == null || inventory.getSlots() < 1) return null;
-        ItemStack stack = inventory.getStackInSlot(0);
-        return stack.is(ItemInit.ZPM.get()) ? hub.zpmEnergy : null;
+    private static IItemHandler hubInventory(BlockEntity hub) {
+        if (hub instanceof ZPMHubEntity original) return original.getItemHandler().resolve().orElse(null);
+        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(hub.getBlockState().getBlock());
+        if (!(hub instanceof ZPMHubEntity) && !id.getPath().equals("triple_zpm_hub")
+                && !(id.getNamespace().equals("sgjourney_mobs") && id.getPath().contains("zpm"))) return null;
+        return hub.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER, Direction.DOWN).orElse(null);
+    }
+
+    private static ZeroPointEnergy zeroPointEnergy(PowerRoute route) {
+        IItemHandler inventory = hubInventory(route.hub());
+        if (inventory == null || route.slot() >= inventory.getSlots()) return null;
+        ItemStack stack = inventory.getStackInSlot(route.slot());
+        if (!stack.is(ItemInit.ZPM.get())) return null;
+        if (route.hub() instanceof ZPMHubEntity original) return original.zpmEnergy;
+        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(route.hub().getBlockState().getBlock());
+        if (id != null && id.getPath().equals("triple_zpm_hub")) {
+            return new ZeroPointEnergy(stack, net.povstalec.sgjourney.common.config.CommonZPMConfig.zpm_hub_max_transfer.get()) {
+                @Override public void onEnergyChanged(long amount, boolean simulate) {
+                    if (simulate) return;
+                    updateZPMItem(stack);
+                    route.hub().setChanged();
+                }
+            };
+        }
+        var energy = stack.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ENERGY).orElse(null);
+        return energy instanceof ZeroPointEnergy zpm ? zpm : null;
     }
 
     /**
@@ -217,7 +243,7 @@ public final class LargeNaquadahCablePowerBridge {
     }
 
     private record PowerRoute(BlockPos coupledCablePos, CableBlockEntity inputCable,
-                              CableBlockEntity hubCable, ZPMHubEntity hub) {
+                              CableBlockEntity hubCable, BlockEntity hub, int slot) {
         private boolean isValid(ServerLevel level, BlockPos controllerPos) {
             BlockPos inputPos = coupledCablePos;
             BlockPos hubCablePos = hubCable.getBlockPos();
@@ -237,3 +263,6 @@ public final class LargeNaquadahCablePowerBridge {
 
     public record PowerSnapshot(long stored, long capacity) { }
 }
+
+
+

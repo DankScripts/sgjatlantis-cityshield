@@ -6,6 +6,7 @@ import com.dankscripts.sgjatlantis_cityshield.registry.ModBlockEntities;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldDefinition;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldMath;
 import com.dankscripts.sgjatlantis_cityshield.shield.ShieldSavedData;
+import com.dankscripts.sgjatlantis_cityshield.config.ShieldConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -27,7 +28,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 public final class ShieldControllerBlockEntity extends BlockEntity implements MenuProvider {
-    public static final int DATA_COUNT = 25;
+    public static final int DATA_COUNT = 26;
     public static final String PORTABLE_DEFINITION_TAG = "RetainedShieldDefinition";
     public static final int BASE_COMMUNICATION_DISTANCE = 16;
     public static final int COMMUNICATION_CRYSTAL_SLOTS = 8;
@@ -81,12 +82,14 @@ public final class ShieldControllerBlockEntity extends BlockEntity implements Me
 
     public boolean hasLargeNaquadahCable() {
         ShieldEmitterBlockEntity emitter = linkedEmitter(true);
-        return emitter != null && emitter.hasLargeNaquadahCable();
+        return emitter != null && emitter.hasPowerConnection();
     }
 
     public boolean hasZeroPointPower() {
         ShieldEmitterBlockEntity emitter = linkedEmitter(true);
-        return emitter != null && emitter.hasZeroPointPower();
+        ShieldDefinition definition = definition();
+        return emitter != null && (emitter.hasUsablePower()
+                || definition != null && definition.active() && emitter.isRecentlyPowered());
     }
 
     public long currentPowerDraw() {
@@ -183,6 +186,14 @@ public final class ShieldControllerBlockEntity extends BlockEntity implements Me
                                   ShieldControllerBlockEntity controller) {
         controller.ejectLegacyZpm(level);
         ShieldDefinition definition = controller.definition();
+        ShieldConfig.RedstoneMode redstoneMode = ShieldConfig.REDSTONE_MODE.get();
+        if (definition != null && redstoneMode != ShieldConfig.RedstoneMode.DISABLED) {
+            boolean signal = level.hasNeighborSignal(pos);
+            boolean requested = redstoneMode == ShieldConfig.RedstoneMode.HIGH_ENABLE ? signal : !signal;
+            if (!requested && definition.active()) controller.setShieldActive(false, level.getGameTime());
+            else if (requested && !definition.active() && controller.hasZeroPointPower())
+                controller.setShieldActive(true, level.getGameTime());
+        }
         if (definition == null || !definition.active()) {
             controller.setVisualState(controller.hasZeroPointPower()
                     ? ShieldControllerBlock.VisualState.WARNING
@@ -198,10 +209,14 @@ public final class ShieldControllerBlockEntity extends BlockEntity implements Me
         }
 
         controller.forceControllerChunk(true);
-        boolean connectedPower = emitter.hasZeroPointPower();
-        controller.setVisualState(!connectedPower
-                ? ShieldControllerBlock.VisualState.STANDBY
-                : ShieldMath.materializationCoverage(definition, level.getGameTime()) < 0.999
+        boolean connectedPower = emitter.hasUsablePower() || emitter.isRecentlyPowered();
+        // Drop the field itself on power loss, not merely the controller lamp.
+        // One recent tick accommodates either block entity tick order.
+        if (!connectedPower) {
+            controller.setShieldActive(false, level.getGameTime());
+            return;
+        }
+        controller.setVisualState(ShieldMath.materializationCoverage(definition, level.getGameTime()) < 0.999
                     ? ShieldControllerBlock.VisualState.FORMING
                     : emitter.isRecentlyPowered()
                         ? ShieldControllerBlock.VisualState.ACTIVE

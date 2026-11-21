@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
 import net.minecraft.world.phys.Vec3;
@@ -17,6 +18,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,6 +31,21 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = AtlantisCityShield.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class ShieldProtectionEvents {
     private ShieldProtectionEvents() {}
+
+    @SubscribeEvent
+    public static void onMobSpawn(MobSpawnEvent.PositionCheck event) {
+        if (event.getSpawnType() != MobSpawnType.NATURAL
+                && event.getSpawnType() != MobSpawnType.CHUNK_GENERATION) return;
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        Vec3 position = new Vec3(event.getX(), event.getY(), event.getZ());
+        for (ShieldDefinition definition : activeShields(level)) {
+            if (ShieldMath.isOperational(definition, level.getGameTime())
+                    && ShieldMath.contains(definition, position)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent event) {
@@ -57,7 +74,7 @@ public final class ShieldProtectionEvents {
 
         List<Projectile> absorbedProjectiles = new ArrayList<>();
         for (Entity entity : level.getAllEntities()) {
-            if (!entity.isAlive() || entity.isRemoved() || entity.isPassenger()
+            if (entity == null || !entity.isAlive() || entity.isRemoved() || entity.isPassenger()
                     || entity instanceof LightningBolt) continue;
 
             Vec3 previous = new Vec3(entity.xo, entity.yo, entity.zo);
@@ -240,6 +257,10 @@ public final class ShieldProtectionEvents {
     }
 
     private static void sendImpact(ServerLevel level, ShieldDefinition definition, Vec3 impact, float strength) {
+        if (definition.emitterPos() != null
+                && level.getBlockEntity(definition.emitterPos()) instanceof com.dankscripts.sgjatlantis_cityshield.block.ShieldEmitterBlockEntity emitter) {
+            emitter.recordImpact();
+        }
         ShieldImpactPacket packet = new ShieldImpactPacket(definition.dimension(), definition.controllerPos().asLong(),
                 impact.x, impact.y, impact.z, strength, level.getGameTime());
         ModNetwork.CHANNEL.send(PacketDistributor.DIMENSION.with(level::dimension), packet);
