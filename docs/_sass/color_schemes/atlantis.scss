@@ -1,0 +1,64 @@
+@import "color_schemes/dark";
+$body-background-color: #07151b;
+$sidebar-color: #0c2731;
+$border-color: #41656d;
+$body-text-color: #c9dce0;
+$body-heading-color: #c2eef0;
+$link-color: #67d4dd;
+$nav-child-link-color: #aed6db;
+$search-background-color: #10333d;
+$search-result-preview-color: #a7c7cc;
+
+.site-header {
+  height: auto !important;
+  min-height: 5rem;
+  max-height: none !important;
+  align-items: center;
+}
+
+.site-title {
+  height: auto !important;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.01em;
+  white-space: normal;
+}
+
+.main-content h1 {
+  line-height: 1.15;
+}
+
+.main-content img {
+  display: block;
+  width: 100%;
+  max-height: 30rem;
+  object-fit: cover;
+  border: 1px solid #41656d;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.35rem 1.2rem rgba(0, 0, 0, 0.35);
+}
+
+.main-content table {
+  width: 100%;
+}
+
+.main-content th {
+  color: #c2eef0;
+  background: #10333d;
+}
+
+.main-content td {
+  vertical-align: top;
+}
+
+@media (min-width: 66.5rem) {
+  .side-bar {
+    width: 18rem;
+  }
+
+  .main {
+    margin-left: 18rem;
+  }
+}

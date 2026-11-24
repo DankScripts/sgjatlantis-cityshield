@@ -7,12 +7,21 @@
 
 Use the loader-specific source branches above.
 
+## Documentation
+
+The standalone City Shield guide and editable site source are in [`docs`](docs/).
+The `Publish documentation` workflow builds the separate GitHub Pages site when
+documentation changes are pushed to `main`, once Pages is configured for GitHub
+Actions. To preview locally, run `bundle install` and `bundle exec jekyll serve`
+from `docs` with Ruby and Bundler installed.
+
 ## v1.0.4 release
 
 Forge 1.20.1 release built against the supplied SGJourney 0.6.55-alpha, requiring Java 17.
 Uses the native ZPM Hub zero-point energy API even when optional item energy
 capabilities are disabled. The user-confirmed table visuals, survey system,
-shield defenses, weather barrier, and default 100,000,000 FE/t draw are retained.
+shield defenses, and weather barrier are retained. The source default ZPM
+standing draw is 20,000,000 FE/t for a reference-size field.
 The separate NeoForge 1.21.1 release also carries version 1.0.4.
 
 ## v1.0.1-beta.2 baseline
@@ -34,12 +43,12 @@ Standalone Forge 1.20.1 mod for fitting, powering, and operating a city-scale At
 
 Power draw now scales with the surveyed ellipsoid volume. The original
 500 x 500 radius, 340-block-height field uses the configured base draw;
-shrinking it reduces draw down to a 1% minimum. Set
+shrinking it reduces draw down to a 50% minimum. Set
 `power.scaleDrawByVolume=false` for fixed draw.
 
 For survival power without a ZPM, attach FE generators or cables directly to
 the Shield Emitter. This route is enabled by `power.allowGeneratorPower`.
-The standard-size shield needs 100,000 FE/t, capped at 25,000 FE/t per face,
+The standard-size shield needs 1,000 FE/t, capped at 250 FE/t per face,
 so four powered faces are required at default settings. Both values are
 configurable in the server TOML. The existing ZPM Hub route remains available.
 
